@@ -154,6 +154,14 @@ class MatchRepository {
       throw error;
     }
   };
+  findMembersByPartyId = async ({ partyId }) => {
+    try {
+      const partyMember = await Members.findAll({ where: {partyId}});
+      return partyMember;
+    } catch (error) {
+      throw (error)
+    }
+  }
 }
 
 module.exports = MatchRepository;

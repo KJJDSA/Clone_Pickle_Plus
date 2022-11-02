@@ -7,15 +7,42 @@ class MatchService {
 
   matchLeader = async ({ userId, ottService, ID, password }) => {
     try {
-      const availbleParty = await this.matchRepository.findLeadersParty({
+      const availableParty = await this.matchRepository.findLeadersParty({
         ottService,
       });
-      if (availbleParty.length > 0) {
-        availbleParty.sort((a, b) => {
+      if (availableParty.length > 0) {
+        availableParty.sort((a, b) => {
           return a.createdAt - b.createdAt;
         });
-        const partyId = availbleParty[0].partyId;
-        const numOfMembers = (availbleParty[0].numOfMembers += 1);
+        
+        // 리더가 없는 방의 수 만큼 for문 돌림
+        for ( let i = 0; i < availableParty.length; i++ ) {
+
+          // 이 파티 아이디
+          const partyId = availableParty[i].dataValues.partyId;
+
+          // 이 파티 아이디에 해당하는 파티의 파티원 불러오기
+          const hasSamePartyIdUser = 
+            (await MatchRepository.findMembersByPartyId({partyId}))
+              .map(x => x.dataValues.userId);
+          console.log('해당 파티에 있는 유저들: ', hasSamePartyIdUser);
+
+          // 지금 로그인 한 유저 아이디 정보 받아오기
+          const thisUserId = userId;
+          console.log('로그인 된 유저의 아이디: ', thisUserId);
+          
+          for ( let j = 0 ; j < hasSamePartyIdUser.length; j++ ) {
+            // 만약 현재 유저 아이디와 중복되는 유저가 파티에 있다면
+            if ( thisUserId === hasSamePartyIdUser[j] )
+              // 에러 발생
+              throw Error("이미 파티원으로 가입된 파티에는 파티장으로 가입하실 수 없습니다.");
+          }
+
+        }
+
+        const partyId = availableParty[0].partyId;
+        console.log(partyId)
+        const numOfMembers = (availableParty[0].numOfMembers += 1);
         await this.matchRepository.updateLeadersParty({
           partyId,
           ID,
@@ -45,6 +72,7 @@ class MatchService {
         });
         const createLeadersMember =
           await this.matchRepository.createLeadersMember({ userId, partyId });
+
         return { party: updateLeadersParty, member: createLeadersMember };
       }
     } catch (error) {
@@ -55,22 +83,46 @@ class MatchService {
   matchMember = async ({ userId, ottService }) => {
     try {
       // 3명 이하인 방만 찾아옴
-      const availbleParty = await this.matchRepository.findMemberParty({
+      const availableParty = await this.matchRepository.findMemberParty({
         //복수 오타 수정
         ottService,
       });
       // 3명이하인 방이 있을경우
-      if (availbleParty.length) {
+      if (availableParty.length) {
         // 3명 이하고 파티장 존재하는 방을 찾아봄
         const hasLeaderParty = await this.matchRepository.findHasLeaderParty({
           ottService,
         });
         console.log(hasLeaderParty);
-        // 3명이하 파티장 있는 방이 있을경우
+        // 3명 이하 파티장 있는 방이 있을경우
         if (hasLeaderParty.length) {
           hasLeaderParty.sort((a, b) => {
             return a.createdAt - b.createdAt;
           });
+
+          // 리더가 있는 방의 수 만큼 for문 돌림
+          for ( let i = 0 ; i < hasLeaderParty.length ; i++ ) {
+            // 이 파티 아이디
+            const partyId = hasLeaderParty[i].dataValues.partyId;
+
+            // 이 파티와 같은 파티 아이디를 가진 유저 모두 찾아 배열에 해당 유저 아이디 값 받아오기
+            const hasSamePartyIdUser = 
+              (await this.matchRepository.findMembersByPartyId({partyId}))
+                .map(x => x.dataValues.userId);
+            console.log('해당 파티에 있는 유저들: ', hasSamePartyIdUser);
+
+            // 지금 로그인 한 유저 아이디 받아오기
+            const thisUserId = userId; 
+            console.log('로그인 된 유저의 아이디 : ',thisUserId);
+
+            for ( let j = 0 ; j < hasSamePartyIdUser.length; j++ ) {
+              // 만약 현재 유저 아이디와 중복되는 유저가 파티에 있다면
+              if ( thisUserId === hasSamePartyIdUser[j] ) 
+                // 에러 발생
+                throw Error("이미 가입된 파티에는 파티원으로 가입하실 수 없습니다.");
+            }
+          }
+          
           const partyId = hasLeaderParty[0].partyId;
           const numOfMembers = hasLeaderParty[0].numOfMembers + 1;
           // 해당 파티 레코드의 numOfMembers 를 1늘려줌
@@ -82,7 +134,7 @@ class MatchService {
           await this.matchRepository.createMember({ userId, partyId });
           console.log(
             ` ${partyId}번 파티에 매칭 / ${
-              numOfMembers - 1
+            numOfMembers - 1
             } -> ${numOfMembers} / 파티장 O`
           );
           if (numOfMembers === 4) {
@@ -92,6 +144,10 @@ class MatchService {
           return ` ${partyId}번 파티에 매칭 / ${
             numOfMembers - 1
           } -> ${numOfMembers} / 파티장 O`;
+              
+            
+          
+        
 
           // 파티장 있는 방이 없는 경우
         } else {
