@@ -345,7 +345,7 @@ module.exports = {
     },
     "/api/myparty/": {
       "get": {
-        "description": "매칭된 파티 정보를 불러오는 기능입니다. 미완",
+        "description": "매칭된 파티 정보를 불러오는 기능입니다.",
         "tags": ["마이파티API"],
         "parameters": [],
         "responses": {
@@ -357,7 +357,7 @@ module.exports = {
     },
     "/api/myparty/{partyId}": {
       "put": {
-        "description": "파티의 ott 계정을 수정하는 기능입니다. 미완?",
+        "description": "파티의 ott 계정을 수정하는 기능입니다.",
         "tags": ["마이파티API"],
         "parameters": [
           {
@@ -385,6 +385,26 @@ module.exports = {
           }
         ],
         "responses": {
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "delete": {
+        "description": "파티를 탈퇴하는 기능입니다. 마지막 멤버였다면 파티가 삭제됩니다.",
+        "tags": ["마이파티API"],
+        "parameters": [
+          {
+            "name": "partyId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          },
           "401": {
             "description": "Unauthorized"
           }

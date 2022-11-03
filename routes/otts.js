@@ -32,19 +32,40 @@ const OTTS = [
     memberCommision: 990,
   },
   {
-    ottService: "Disney+",
+    ottService: "DisneyPlus",
     price: 99000,
     hostCommision: 490,
     memberCommision: 990,
   }
 ]
 
+const price = {
+  Netflix: 170000,
+  Wavve: 139000,
+  Watcha: 129000,
+  Laftel: 149000,
+  Tving: 99000,
+  DisneyPlus: 99000,
+}
 
 router.get("/:ottId", (req, res) => {
   try {
     const { ottId } = req.params
     const ott = OTTS[ottId - 1]
     res.status(200).json({ data: ott })
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/", (req, res) => {
+  try {
+    let result = {}
+    const { ottServices } = req.body;
+    for (const ottService of ottServices) {
+      result[ottService] = price[ottService]
+    }
+    res.status(200).json({ data: result })
   } catch (error) {
     console.log(error);
   }

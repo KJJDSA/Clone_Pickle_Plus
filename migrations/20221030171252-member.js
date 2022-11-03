@@ -25,6 +25,9 @@ module.exports = {
       isLeader: {
         type: Sequelize.BOOLEAN,
       },
+      isMatched: {
+        type: Sequelize.BOOLEAN,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

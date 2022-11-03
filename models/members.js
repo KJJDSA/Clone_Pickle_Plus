@@ -29,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       partyId: DataTypes.INTEGER,
       userId: DataTypes.INTEGER,
       isLeader: DataTypes.BOOLEAN,
+      isMatched: DataTypes.BOOLEAN,
     },
     {
       sequelize,

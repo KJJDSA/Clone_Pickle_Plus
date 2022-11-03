@@ -1,9 +1,11 @@
 const users = require("../models/users");
 const MyPageRepository = require("../repositories/mypage");
+const MyPartyService = require('./myparty');
 
 class MyPageService {
   constructor() {
     this.myPageRepository = new MyPageRepository();
+    this.myPartyService = new MyPartyService();
   }
 
   // 유저 닉네임과 폰 번호 조회
@@ -34,6 +36,13 @@ class MyPageService {
   // 유저 회원 탈퇴
   deleteUserAccount = async ({ userId }) => {
     try {
+      // myParty에 이미 있는 메서드를 끌고 와서 사용하도록 하자.
+      const partyList = await this.myPartyService.lookupMyParty({ userId })
+      // 탈퇴하는 것도 이미 만든 메서드가 있으니 애용하도록 하자.
+      for (let i = 0; i < partyList.length; i++) {
+        await this.myPartyService.exitParty({ userId, partyId: partyList[i].partyId })
+      }
+      // 마지막으로 회원탈퇴
       const myInfo = await this.myPageRepository.deleteUserAccount({ userId });
       return myInfo;
     } catch (error) {

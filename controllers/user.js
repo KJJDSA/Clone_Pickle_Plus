@@ -3,12 +3,13 @@ const Joi = require('joi');
 
 const re_nickname = /^[a-zA-Z0-9]{3,10}$/;
 const re_password = /^[a-zA-Z0-9]{4,30}$/;
+const re_phone = /^[0-9]{10,15}$/;
 
 const userSchema = Joi.object({
   nickname: Joi.string().pattern(re_nickname).required(),
   password: Joi.string().pattern(re_password).required(),
-  confirm: Joi.string(),
-  phone: Joi.string()
+  confirm: Joi.any().valid(Joi.ref('password')),
+  phone: Joi.string().pattern(re_phone)
 });
 
 const loginSchema = Joi.object({

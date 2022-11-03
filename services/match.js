@@ -1,8 +1,10 @@
 const MatchRepository = require("../repositories/match");
+const Sens = require("./sendMessege");
 
 class MatchService {
   constructor() {
     this.matchRepository = new MatchRepository();
+    this.sens = new Sens();
   }
 
   matchLeader = async ({ userId, ottService, ID, password }) => {
@@ -54,7 +56,19 @@ class MatchService {
         });
         const createLeadersMember =
           await this.matchRepository.createLeadersMember({ userId, partyId });
-        return { party: updateLeadersParty, member: createLeadersMember };
+
+        //(주의!!!!!)매칭되면 문자 가게 하는 메서드 1/2
+        if (numOfMembers === 4) {
+          const phone_numbers = await this.matchRepository.findAndCheck({ partyId })
+          // const message = 
+          // `[티끌플러스]
+          // 축하드립니다 매칭에 성공했어요!
+          // 마이페이지는 검색으로^^`
+          // for (const phone of phone_numbers) {
+          //   this.sens.send_message(phone, message)
+          // }
+        }
+        return `${partyId + 5030}번 파티의 매칭이 성공했어요! 마이페이지를 확인하세요.`;
       } else {
         const newParty = await this.matchRepository.createLeadersParty({
           ottService,
@@ -72,8 +86,8 @@ class MatchService {
         });
         const createLeadersMember =
           await this.matchRepository.createLeadersMember({ userId, partyId });
-
-        return { party: updateLeadersParty, member: createLeadersMember };
+        // return { party: updateLeadersParty, member: createLeadersMember }
+        return ` ${partyId}번 파티에 매칭 / ${numOfMembers - 1} -> ${numOfMembers} / 파티장 O`;
       }
     } catch (error) {
       throw error;
@@ -94,7 +108,7 @@ class MatchService {
           ottService,
         });
         console.log(hasLeaderParty);
-        // 3명 이하 파티장 있는 방이 있을경우
+        // 3명이하 파티장 있는 방이 있을경우
         if (hasLeaderParty.length) {
           hasLeaderParty.sort((a, b) => {
             return a.createdAt - b.createdAt;
@@ -133,21 +147,25 @@ class MatchService {
           // Members 테이블에 매칭한 유저 생성함
           await this.matchRepository.createMember({ userId, partyId });
           console.log(
-            ` ${partyId}번 파티에 매칭 / ${
-            numOfMembers - 1
+            ` ${partyId}번 파티에 매칭 / ${numOfMembers - 1
             } -> ${numOfMembers} / 파티장 O`
           );
+
+          //(주의!!!!!)매칭되면 문자 가게 하는 메서드 2/2 
           if (numOfMembers === 4) {
-            console.log(`${partyId} 번 파티의 매칭이 성공했어요!`);
-            return `${partyId} 번 파티의 매칭이 성공했어요!`;
+            const phone_numbers = await this.matchRepository.findAndCheck({ partyId })
+            // const message =
+            //   `[티끌플러스]
+            // 축하드립니다 매칭에 성공했어요!
+            // 마이페이지는 검색으로^^`
+            // for (const phone of phone_numbers) {
+            //   this.sens.send_message(phone, message)
+            // }
+            return `${partyId + 5030} 번 파티의 매칭이 성공했어요! 마이페이지를 확인하세요.`;
           }
           return ` ${partyId}번 파티에 매칭 / ${
             numOfMembers - 1
           } -> ${numOfMembers} / 파티장 O`;
-              
-            
-          
-        
 
           // 파티장 있는 방이 없는 경우
         } else {
@@ -169,13 +187,9 @@ class MatchService {
             // Members 테이블에 매칭한 유저 생성함
             await this.matchRepository.createMember({ userId, partyId });
             console.log(
-              `${partyId}번 파티에 매칭 / ${
-                numOfMembers - 1
-              } -> ${numOfMembers} / 파티장 X `
+              `${partyId}번 파티에 매칭 / ${numOfMembers - 1} -> ${numOfMembers} / 파티장 X `
             );
-            return `${partyId}번 파티에 매칭 / ${
-              numOfMembers - 1
-            } -> ${numOfMembers} / 파티장 X `;
+            return `${partyId}번 파티에 매칭 / ${numOfMembers - 1} -> ${numOfMembers} / 파티장 X `;
             // 3명 이하인 파티는 있는데 파티장이 들어가야 하는 방만 있는 경우
           } else {
             const noLeaderParty = await this.matchRepository.createMemberParty({
