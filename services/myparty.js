@@ -29,6 +29,21 @@ class MyPartyService {
     }
   };
 
+  // 정보 넘기기
+  findOneParty = async ({ userId, partyId }) => {
+    try {
+      const findOneParty = await this.myPartyRepository.findOneParty({
+        userId,
+        partyId
+      })
+      return findOneParty;
+
+    } catch (error) {
+      console.log(`${error.name}:${error.message}`);
+      res.status(400).json({ Type: error.name, Message: error.message });
+    }
+  }
+
   changeOttInfo = async ({ userId, partyId, ID, password }) => {
     try {
       const findMember = await this.myPartyRepository.findMemberWithParty({

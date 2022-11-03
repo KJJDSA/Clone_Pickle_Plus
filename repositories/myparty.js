@@ -25,6 +25,18 @@ class MyPartyRepository {
     }
   };
 
+  // 유저 아이디와 파티 아이디로 파티 정보 조회
+  findOneParty = async ({partyId}) => {
+    try {
+      const myParty = await Parties.findOne({
+        where: { userId, partyId },
+      });
+      return myParty
+    } catch (error) {
+      throw error;
+    }
+  }
+
   findMemberWithParty = async ({ userId, partyId }) => {
     try {
       const member = await Members.findOne({
